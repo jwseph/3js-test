@@ -8,6 +8,7 @@ const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 100
 camera.position.set(30, 50, 40);
 camera.lookAt(0, 0, 0);
 
+scene.background = new THREE.Color(0xfdfbd3);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
@@ -24,7 +25,7 @@ window.addEventListener('resize', function () {
 })
 
 function getCube() {
-    const geometry = new THREE.BoxGeometry(20, 5, 20);
+    const geometry = new THREE.BoxGeometry(200, 5, 200);
     const material = new THREE.MeshStandardMaterial({color: 0x00ff00, roughness: .2, metalness: .3});
     return new THREE.Mesh(geometry, material);
 }
@@ -49,12 +50,24 @@ const line = getLine();
 line.rotation.x = -Math.PI/2;
 scene.add(line);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1); // soft white light
+const dirLight = new THREE.DirectionalLight(0xfdfbd3, 2); // soft white light
 dirLight.castShadow = true;
-dirLight.position.set(5, 4, 3);
-scene.add(dirLight);
+dirLight.position.set(0, 100, 0);
+scene.add(dirLight)
+let light = dirLight
 
-const ambLight = new THREE.AmbientLight(0xffffff, .2);
+//Set up shadow properties for the light
+light.shadow.mapSize.width = 3000; // default
+light.shadow.mapSize.height = 3000; // default
+light.shadow.camera.top = 100;
+light.shadow.camera.bottom = - 100;
+light.shadow.camera.left = - 100;
+light.shadow.camera.right = 100;
+light.shadow.camera.near = 0.01;
+light.shadow.camera.far = 10000;
+light.shadow.bias = 0.0001;
+
+const ambLight = new THREE.AmbientLight(0xfdfbd3, 1);
 scene.add(ambLight);
 
 // const loader = new GLTFLoader();
@@ -86,13 +99,26 @@ const loader = new GLTFLoader();
 // 	console.error( error );
 // } );
 
-loader.load('./Boab.glb', function (gltf) {
+loader.load('./Tree.glb', function (gltf) {
     scene.add(gltf.scene);
     const tree = gltf.scene.children[0];
     tree.castShadow = true;
+    tree.scale.set(30,30,30);
+    tree.position.set(0,40,0)
 }, undefined, function (error) {
     console.error(error);
 });
+loader.load('./Cloud Set.glb', function (gltf) {
+    scene.add(gltf.scene);
+    const clouds = gltf.scene.children[0];
+    for(child of gltf.scene.children){
+        child.scale.set(5,5,5);
+    }
+    
+}, undefined, function (error) {
+    console.error(error);
+}); 
+
 
 function animate() {
     // cube.rotation.x += .01, cube.rotation.y += .01;
