@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 1000);
@@ -10,6 +11,15 @@ camera.lookAt(0, 0, 0);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(innerWidth, innerHeight);
 document.body.appendChild(renderer.domElement);
+
+var controls = new OrbitControls(camera, renderer.domElement);
+controls.update();
+
+window.addEventListener('resize', function () {
+    renderer.setSize(innerWidth, innerHeight);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+})
 
 function getCube() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -66,9 +76,10 @@ loader.load( './shiba/scene.gltf', function ( gltf ) {
 } );
 
 function animate() {
-    cube.rotation.x += .01, cube.rotation.y += .01;
-    line.rotation.x += .01, line.rotation.y += .01;
-    if (shiba != null) shiba.rotation.x += .01, shiba.rotation.y += .01;
+    // cube.rotation.x += .01, cube.rotation.y += .01;
+    // line.rotation.x += .01, line.rotation.y += .01;
+    // if (shiba != null) shiba.rotation.x += .01, shiba.rotation.y += .01;
+    controls.update();
     renderer.render(scene, camera);
 }
 
