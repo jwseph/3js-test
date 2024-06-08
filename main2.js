@@ -7,10 +7,10 @@ const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-innerWidth/4, innerWidth/4, innerHeight/4, -innerHeight/4, .001, 1000 );
 // camera.position.set(3, 5, 4);
 camera.zoom = 100;
-camera.updateProjectionMatrix();
-camera.position.set(10, 10, 10);
-camera.lookAt(0, 0, 0);
 window.camera = camera;
+
+const camerahelper = new THREE.CameraHelper(camera)
+scene.add(camerahelper)
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -21,7 +21,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 var controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+//controls.enableDamping = true;
 controls.screenSpacePanning = false;
 window.controls = controls;
 controls.maxZoom = 400;
@@ -29,6 +29,8 @@ controls.minZoom = 20;
 controls.maxDistance = 2;
 controls.minPolarAngle = controls.maxPolarAngle = Math.asin((2/3)**.5);
 controls.update();
+
+camera.translateX(100)
 
 window.addEventListener('resize', function () {
     renderer.setSize(innerWidth, innerHeight);
@@ -48,18 +50,21 @@ terrain.receiveShadow = true;
 console.log(terrain);
 scene.add(terrain);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, .2); // soft white light
+const dirLight = new THREE.DirectionalLight(0xffffff, .4); // soft white light
 dirLight.castShadow = true;
-dirLight.position.set(30, 70, 10);
+dirLight.position.set(3, 7, 1);
 let light = dirLight;
-light.shadow.mapSize.width = 51200; // default
-light.shadow.mapSize.height = 51200; // default
-light.shadow.camera.near = 0.0001; // default
-light.shadow.camera.far = 500000; // default
-light.shadow.camera.left = -100;
-light.shadow.camera.right = 100;
-light.shadow.camera.bottom = -100;
-light.shadow.camera.top = 100;
+light.shadow.mapSize.width = 1024; // default
+light.shadow.mapSize.height = 1024; // default
+light.shadow.camera.near = 0.01; // default
+light.shadow.camera.far = 5000; // default
+light.shadow.camera.left = -10;
+light.shadow.camera.right = 10;
+light.shadow.camera.bottom = -10;
+light.shadow.camera.top = 10;
+
+const shadowhelper = new THREE.DirectionalLightHelper(dirLight);
+scene.add(shadowhelper);
 
 scene.add(dirLight);
 
