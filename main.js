@@ -5,11 +5,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, .1, 1000);
-camera.position.set(0, 0, 10);
+camera.position.set(30, 50, 40);
 camera.lookAt(0, 0, 0);
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 var controls = new OrbitControls(camera, renderer.domElement);
@@ -22,14 +24,15 @@ window.addEventListener('resize', function () {
 })
 
 function getCube() {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    const geometry = new THREE.BoxGeometry(20, 5, 20);
+    const material = new THREE.MeshStandardMaterial({color: 0x00ff00, roughness: .2, metalness: .3});
     return new THREE.Mesh(geometry, material);
 }
 
 const cube = getCube();
+cube.receiveShadow = true;
 console.log(cube);
-// scene.add(cube);
+scene.add(cube);
 
 function getLine() {
     const material = new THREE.LineBasicMaterial({color: 0xff0000})
@@ -45,6 +48,14 @@ function getLine() {
 const line = getLine();
 line.rotation.x = -Math.PI/2;
 scene.add(line);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1); // soft white light
+dirLight.castShadow = true;
+dirLight.position.set(5, 4, 3);
+scene.add(dirLight);
+
+const ambLight = new THREE.AmbientLight(0xffffff, .2);
+scene.add(ambLight);
 
 // const loader = new GLTFLoader();
 // loader.load('./Avocado/Avocado.gltf', function (gltf) {
@@ -63,17 +74,25 @@ scene.add(line);
 // });
 
 const loader = new GLTFLoader();
-let shiba = null;
 
-loader.load( './shiba/scene.gltf', function ( gltf ) {
-    shiba = gltf.scene.children[0];
-    shiba.rotation.x = shiba.rotation.y = 0;
-    shiba.rotation.x = -Math.PI/2;
-    console.log(shiba);
-	scene.add( gltf.scene );
-}, undefined, function ( error ) {
-	console.error( error );
-} );
+// let shiba = null;
+// loader.load( './shiba/scene.gltf', function ( gltf ) {
+//     shiba = gltf.scene.children[0];
+//     shiba.rotation.x = shiba.rotation.y = 0;
+//     shiba.rotation.x = -Math.PI/2;
+//     console.log(shiba);
+// 	scene.add( gltf.scene );
+// }, undefined, function ( error ) {
+// 	console.error( error );
+// } );
+
+loader.load('./Boab.glb', function (gltf) {
+    scene.add(gltf.scene);
+    const tree = gltf.scene.children[0];
+    tree.castShadow = true;
+}, undefined, function (error) {
+    console.error(error);
+});
 
 function animate() {
     // cube.rotation.x += .01, cube.rotation.y += .01;
