@@ -128,14 +128,17 @@ function initialize_terrain() {
     for (let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
         const subterrain = new THREE.Group()
         terrainarray[i] = subterrain
-        terraingroup.add(terrainarray[i])
+        terraingroup.add(subterrain)
     }
+    let j = 0
     for (let i = 0; i < PLOT_WIDTH; i++) {
         for(let y = 0; y < PLOT_WIDTH; y++){
+
             let temp = getLand()
             temp.position.set(i-1, 0, y-1);
-            terrainarray[i+y].add(temp);
+            terrainarray[i+y+j].add(temp);
         }
+        j += 2    
     }
 }
 
@@ -174,7 +177,6 @@ getTree("roses", 7)
 getTree("cotton", 9)
 getTree("mushroom", 8)
 
-
 function getLand(){
     let result = new THREE.Group()
     loader.load('./terrain-world-plain.glb', function (gltf) {
@@ -197,14 +199,36 @@ function getLand(){
     return result
 }
 
+let toAnimate
+let drop = false
+
+function dropAnimation() {
+    toAnimate.translateY(-0.04)
+    if (toAnimate.position.getComponent(1) <= 0.12){
+        drop = false
+        toAnimate.translateY(0.12-toAnimate.position.getComponent(1))
+    }
+}
+
 var click = 0
 function focus(plot) {
     console.log("focusing")
     var dict = plant_pos_dictionary[plot]
     controls.target = new THREE.Vector3(dict[0], 0.5, dict[2])
+    for(let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        if (i != plot-1) {
+            terrainarray[i].visible = false;
+        } else {
+            terrainarray[i].visible = true;
+        }
 
-    controls.update();
+    }
+    terrainarray[plot-1].position.set(terrainarray[plot-1].position.getComponent(0), 0.3, terrainarray[plot-1].position.getComponent(2))
+    toAnimate = terrainarray[plot-1]
+    drop = true
 }
+
+
 
 function buttonclick() {
     if (click >= 9) {
@@ -219,18 +243,34 @@ document.getElementById('button').addEventListener("click", function(e){
     buttonclick()
 })
 
+
+let clock = new THREE.Clock();
+let delta = 0;
+let interval = 1 / 60;
+
 function animate() {
-    // cube.rotation.x += .01, cube.rotation.y += .01;
-    // line.rotation.x += .01, line.rotation.y += .01;
-    // if (shiba != null) shiba.rotation.x += .01, shiba.rotation.y += .01;
-    controls.update();
-    renderer.render(scene, camera);
+    requestAnimationFrame(animate)
+    delta += clock.getDelta();
+
+    if (delta  > interval) {
+        if (drop) {
+            dropAnimation()
+        }
+        controls.update();
+        
+        renderer.render(scene, camera);
+        
+        delta = delta % interval;
+    }
 }
 
-if (WebGL.isWebGLAvailable()) {
-	// Initiate function or other initializations here
-    renderer.setAnimationLoop(animate);
-} else {
-	const warning = WebGL.getWebGLErrorMessage();
-	document.getElementById( 'container' ).appendChild( warning );
-}
+animate();
+
+
+// if (WebGL.isWebGLAvailable()) {
+// 	// Initiate function or other initializations here
+//     renderer.setAnimationLoop(animate);
+// } else {
+// 	const warning = WebGL.getWebGLErrorMessage();
+// 	document.getElementById( 'container' ).appendChild( warning );
+// }
