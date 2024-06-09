@@ -9,7 +9,7 @@ const plants_dictionary = {
     "oak":["./tree-oak.glb", 1/800, 0.12],
     "apple":["./tree-round-apple.glb", 1/500, 0.12],
     "carnations":["./carnations.glb", 1/500, 0.12],
-    "tall":["./tree-tall.glb", 1/500, 0.12],
+    "tall":["./tree-tall.glb", 1/500, 0.13],
     "birch-tall":["./tree-birch-tall.glb", 1/500, 0.12],
     "forest":["./tree-forest.glb", 1/500, 0.12],
     "lime":["./tree-lime.glb", 1/500, 0.12],
@@ -27,7 +27,6 @@ const plants_dictionary = {
     "shrub-flowers":["./shrub-flowers.glb", 1/500, 0.12],
     "sunflower":["./sunflower.glb", 1/500, 0.12],
     "wheat":["./wheat-plant.glb", 1/500, 0.12],
-    "tall":["./tree-tall.glb", 1/500, 0.13],
 };
 
 const plant_pos_dictionary = {
