@@ -69,7 +69,7 @@ document.body.appendChild(renderer.domElement);
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.screenSpacePanning = true;
-// controls.enablePan = false;
+controls.enablePan = false;
 window.controls = controls;
 controls.maxZoom = 400;
 controls.minZoom = 20;
@@ -84,8 +84,6 @@ window.addEventListener('resize', function () {
     [camera.top, camera.bottom] = [innerHeight/2, -innerHeight/2];
     camera.updateProjectionMatrix();
 })
-
-
 
 const dirLight = new THREE.DirectionalLight(0xF9E30E, 5); // soft white light
 dirLight.castShadow = true;
@@ -123,10 +121,27 @@ const loader = new GLTFLoader();
 // sky.material.side = THREE.BackSide;
 // scene.add(sky);
 
+const terraingroup = new THREE.Group();
+const terrainarray = new Array(PLOT_WIDTH*PLOT_WIDTH)
+
+function initialize_terrain() {
+    for (let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        const subterrain = new THREE.Group()
+        terrainarray[i] = subterrain
+        terraingroup.add(terrainarray[i])
+    }
+    for (let i = 0; i < PLOT_WIDTH; i++) {
+        for(let y = 0; y < PLOT_WIDTH; y++){
+            let temp = getLand()
+            temp.position.set(i-1, 0, y-1);
+            terrainarray[i+y].add(temp);
+        }
+    }
+}
+
 function getTree(key, pos){
     let plant = plants_dictionary[key]
     let plant_pos = plant_pos_dictionary[pos]
-    let result = new THREE.Group()
     loader.load(plant[0], function (gltf) {
         const tree = gltf.scene;
         let m = plant[1]
@@ -140,22 +155,24 @@ function getTree(key, pos){
                 child.receiveShadow = true;
             }
         } );
-        result.add(tree)
+        terrainarray[pos-1].add(tree)
     }, undefined, function (error) {
         console.error(error);
     });
-    return result
 }
 
-scene.add(getTree("birch", 1))
-scene.add(getTree("maple", 2))
-scene.add(getTree("oak", 3))
-scene.add(getTree("apple", 4))
-scene.add(getTree("tall", 5))
-scene.add(getTree("pumpkin", 6))
-scene.add(getTree("roses", 7))
-scene.add(getTree("cotton", 9))
-scene.add(getTree("mushroom", 8))
+initialize_terrain()
+scene.add(terraingroup);
+
+getTree("birch", 1)
+getTree("maple", 2)
+getTree("oak", 3)
+getTree("apple", 4)
+getTree("tall", 5)
+getTree("pumpkin", 6)
+getTree("roses", 7)
+getTree("cotton", 9)
+getTree("mushroom", 8)
 
 
 function getLand(){
@@ -180,25 +197,12 @@ function getLand(){
     return result
 }
 
-function getTerrain() {
-    const terraingroup = new THREE.Group();
-    for (let i = 0; i < PLOT_WIDTH; i++) {
-        for(let y = 0; y < PLOT_WIDTH; y++){
-            let temp = getLand()
-            temp.position.set(i-1, 0, y-1);
-            terraingroup.add(temp);
-        }
-    }
-    return terraingroup;
-}
-
-const terrain = getTerrain();
-scene.add(terrain);
 var click = 0
 function focus(plot) {
     console.log("focusing")
     var dict = plant_pos_dictionary[plot]
-    controls.target = new THREE.Vector3(dict[0], 0, dict[2])
+    controls.target = new THREE.Vector3(dict[0], 0.5, dict[2])
+
     controls.update();
 }
 
