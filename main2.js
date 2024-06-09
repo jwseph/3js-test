@@ -125,14 +125,12 @@ const loader = new GLTFLoader();
 
 function getTree(key, pos){
     let plant = plants_dictionary[key]
-    console.log(plant[0])
     let plant_pos = plant_pos_dictionary[pos]
     let result = new THREE.Group()
     loader.load(plant[0], function (gltf) {
         const tree = gltf.scene;
         let m = plant[1]
         tree.scale.set(m, m, m);
-        console.log(plant[2])
         tree.position.set(plant_pos[0], plant[2], plant_pos[2])
         tree.receiveShadow = true;
         tree.traverse( function( child ) { 
@@ -169,7 +167,7 @@ function getLand(){
         land.position.set(0,0.12,0)
         land.receiveShadow = true;
         land.traverse( function( child ) { 
-            if ( child.isMesh ) {
+            if (child.isMesh) {
                 child.material.metalness = 0;
                 child.castShadow = true;
                 child.receiveShadow = true;
@@ -196,8 +194,26 @@ function getTerrain() {
 
 const terrain = getTerrain();
 scene.add(terrain);
+var click = 0
+function focus(plot) {
+    console.log("focusing")
+    var dict = plant_pos_dictionary[plot]
+    controls.target = new THREE.Vector3(dict[0], 0, dict[2])
+    controls.update();
+}
 
+function buttonclick() {
+    if (click >= 9) {
+        click = 1
+    } else {
+        click++
+    }
+    focus(click)
+}
 
+document.getElementById('button').addEventListener("click", function(e){
+    buttonclick()
+})
 
 function animate() {
     // cube.rotation.x += .01, cube.rotation.y += .01;
