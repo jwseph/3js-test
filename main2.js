@@ -30,7 +30,6 @@ const plants_dictionary = {
     "tall":["./tree-tall.glb", 1/500, 0.13],
 };
 
-
 const plant_pos_dictionary = {
     "1":[-1,0,-1],
     "2":[-1,0,0],
@@ -48,7 +47,7 @@ const PLOT_WIDTH = 3
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-innerWidth/4, innerWidth/4, innerHeight/4, -innerHeight/4, .000001, 1000 );
 camera.position.set(10, 10, 10);
-camera.zoom = 100;
+camera.zoom = 1;
 const hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
 scene.add(hemiLight)
 scene.add(camera)
@@ -71,7 +70,7 @@ controls.screenSpacePanning = false;
 controls.enablePan = false;
 window.controls = controls;
 controls.maxZoom = 400;
-controls.minZoom = 40;
+controls.minZoom = 100;
 controls.minPolarAngle = controls.maxPolarAngle = Math.asin((2/3)**.5);
 controls.target = new THREE.Vector3(0, 0, 0)
 controls.update();
@@ -201,7 +200,7 @@ let toAnimate
 let drop = false
 
 function dropAnimation() {
-    toAnimate.translateY(-0.04)
+    toAnimate.translateY(-0.01)
     if (toAnimate.position.getComponent(1) <= 0.12){
         drop = false
         toAnimate.translateY(0.12-toAnimate.position.getComponent(1))
@@ -212,18 +211,28 @@ var click = 0
 function focus(plot) {
     console.log("focusing")
     var dict = plant_pos_dictionary[plot]
-    controls.target = new THREE.Vector3(dict[0], 0.5, dict[2])
+    controls.target = new THREE.Vector3(dict[0], 0.4, dict[2])
     for(let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
         if (i != plot-1) {
             terrainarray[i].visible = false;
         } else {
             terrainarray[i].visible = true;
         }
-
     }
+    controls.minZoom = 200;
     terrainarray[plot-1].position.set(terrainarray[plot-1].position.getComponent(0), 0.3, terrainarray[plot-1].position.getComponent(2))
     toAnimate = terrainarray[plot-1]
     drop = true
+}
+
+function reconstruct() {
+    for(let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        terrainarray[i].visible = true;
+        terrainarray[i].position.set(terrainarray[i].position.getComponent(0), 0.12, terrainarray[i].position.getComponent(2))
+    }
+    controls.target = new THREE.Vector3(0, 0, 0)
+    controls.minZoom = 100;
+    camera.zoom = 1;
 }
 
 function buttonclick() {
@@ -235,8 +244,16 @@ function buttonclick() {
     focus(click)
 }
 
+function buttonclick2() {
+    reconstruct()
+}
+
 document.getElementById('button').addEventListener("click", function(e){
     buttonclick()
+})
+
+document.getElementById('button2').addEventListener("click", function(e){
+    buttonclick2()
 })
 
 //Locks animations to 60 fps
@@ -262,7 +279,6 @@ function animate() {
 }
 
 animate();
-
 
 // if (WebGL.isWebGLAvailable()) {
 // 	// Initiate function or other initializations here
