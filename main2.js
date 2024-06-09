@@ -3,6 +3,26 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+const plants_dictionary = {
+    "birch":["./tree-birch.glb", 1/800, 0.12],
+    "maple":["./tree-maple.glb", 1/800, 0.12],
+    "oak":["./tree-oak.glb", 1/800, 0.12],
+    "apple":["./tree-round-apple.glb", 1/800, 0.12],
+    "tall":["./tree-tall.glb", 1/500, 0.12]
+};
+
+const plant_pos_dictionary = {
+    "1":[-1,0,-1],
+    "2":[-1,0,0],
+    "3":[-1,0,1],
+    "4":[0,0,-1],
+    "5":[0,0,0],
+    "6":[0,0,1],
+    "7":[1,0,-1],
+    "8":[1,0,0],
+    "9":[1,0,1]
+};
+
 const PLOT_WIDTH = 3
 
 const scene = new THREE.Scene();
@@ -47,7 +67,7 @@ window.addEventListener('resize', function () {
 
 
 
-const dirLight = new THREE.DirectionalLight(0xF9E30E, 10); // soft white light
+const dirLight = new THREE.DirectionalLight(0xF9E30E, 5); // soft white light
 dirLight.castShadow = true;
 dirLight.position.set(3, 7, 1);
 let light = dirLight;
@@ -59,6 +79,8 @@ light.shadow.camera.left = -20;
 light.shadow.camera.right = 20;
 light.shadow.camera.bottom = -20;
 light.shadow.camera.top = 20;
+
+
 
 const shadowhelper = new THREE.DirectionalLightHelper(dirLight);
 scene.add(shadowhelper);
@@ -83,29 +105,40 @@ var sky = new THREE.Mesh(skyGeo, material);
 sky.material.side = THREE.BackSide;
 scene.add(sky);
 
-
-function getTree(gltf) {
-    const tree = gltf.scene.children[0];
-    return tree;
+function getTree(key, pos){
+    let plant = plants_dictionary[key]
+    console.log(plant[0])
+    let plant_pos = plant_pos_dictionary[pos]
+    let result = new THREE.Group()
+    loader.load(plant[0], function (gltf) {
+        const tree = gltf.scene;
+        let m = plant[1]
+        tree.scale.set(m, m, m);
+        console.log(plant[2])
+        tree.position.set(plant_pos[0], plant[2], plant_pos[2])
+        tree.receiveShadow = true;
+        tree.traverse( function( child ) { 
+            if ( child.isMesh ) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+            }
+        } );
+        result.add(tree)
+    }, undefined, function (error) {
+        console.error(error);
+    });
+    return result
 }
 
-loader.load('./tree-maple.glb', function (gltf) {
-    const tree = getTree(gltf);
-    let m = 1/800;
-    tree.scale.set(m, m, m);
-    tree.traverse( function( child ) { 
-        if ( child.isMesh ) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-        }
-    
-    } );
-    tree.castShadow = true;
-    tree.position.set(0,0.13,0)
-    scene.add(tree);
-}, undefined, function (error) {
-    console.error(error);
-});
+scene.add(getTree("birch", 1))
+scene.add(getTree("maple", 2))
+scene.add(getTree("oak", 3))
+scene.add(getTree("apple", 4))
+scene.add(getTree("tall", 5))
+scene.add(getTree("oak", 6))
+scene.add(getTree("apple", 7))
+scene.add(getTree("birch", 9))
+
 
 function getLand(){
     let result = new THREE.Group()
