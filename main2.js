@@ -30,7 +30,6 @@ const plants_dictionary = {
     "tall":["./tree-tall.glb", 1/500, 0.13],
 };
 
-
 const plant_pos_dictionary = {
     "1":[-1,0,-1],
     "2":[-1,0,0],
@@ -47,16 +46,15 @@ const PLOT_WIDTH = 3
 
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-innerWidth/4, innerWidth/4, innerHeight/4, -innerHeight/4, .000001, 1000 );
-camera.position.set(100, 100, 100);
-camera.zoom = 100;
+camera.position.set(10, 10, 10);
+camera.zoom = 1;
 const hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 );
 scene.add(hemiLight)
+scene.add(camera)
 
-// scene.background = new THREE.Color(0x0CA6EA)
+scene.background = new THREE.Color(0x9bd2e8);
+
 window.camera = camera;
-
-const camerahelper = new THREE.CameraHelper(camera)
-scene.add(camerahelper)
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -68,24 +66,21 @@ document.body.appendChild(renderer.domElement);
 
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.screenSpacePanning = true;
-// controls.enablePan = false;
+controls.screenSpacePanning = false;
+controls.enablePan = false;
 window.controls = controls;
 controls.maxZoom = 400;
-controls.minZoom = 20;
-// controls.maxDistance = 10;
+controls.minZoom = 100;
 controls.minPolarAngle = controls.maxPolarAngle = Math.asin((2/3)**.5);
 controls.target = new THREE.Vector3(0, 0, 0)
 controls.update();
 
 window.addEventListener('resize', function () {
     renderer.setSize(innerWidth, innerHeight);
-    [camera.left, camera.right] = [-innerWidth/2, innerWidth/2];
-    [camera.top, camera.bottom] = [innerHeight/2, -innerHeight/2];
+    [camera.left, camera.right] = [-innerWidth/4, innerWidth/4];
+    [camera.top, camera.bottom] = [innerHeight/4, -innerHeight/4];
     camera.updateProjectionMatrix();
 })
-
-
 
 const dirLight = new THREE.DirectionalLight(0xF9E30E, 0); // soft white light
 dirLight.castShadow = true;
@@ -123,10 +118,30 @@ const loader = new GLTFLoader();
 // sky.material.side = THREE.BackSide;
 // scene.add(sky);
 
+const terraingroup = new THREE.Group();
+const terrainarray = new Array(PLOT_WIDTH*PLOT_WIDTH)
+
+function initialize_terrain() {
+    for (let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        const subterrain = new THREE.Group()
+        terrainarray[i] = subterrain
+        terraingroup.add(subterrain)
+    }
+    let j = 0
+    for (let i = 0; i < PLOT_WIDTH; i++) {
+        for(let y = 0; y < PLOT_WIDTH; y++){
+
+            let temp = getLand()
+            temp.position.set(i-1, 0, y-1);
+            terrainarray[i+y+j].add(temp);
+        }
+        j += 2
+    }
+}
+
 function getTree(key, pos){
     let plant = plants_dictionary[key]
     let plant_pos = plant_pos_dictionary[pos]
-    let result = new THREE.Group()
     loader.load(plant[0], function (gltf) {
         const tree = gltf.scene;
         let m = plant[1]
@@ -140,23 +155,24 @@ function getTree(key, pos){
                 child.receiveShadow = true;
             }
         } );
-        result.add(tree)
+        terrainarray[pos-1].add(tree)
     }, undefined, function (error) {
         console.error(error);
     });
-    return result
 }
 
-scene.add(getTree("birch", 1))
-scene.add(getTree("maple", 2))
-scene.add(getTree("oak", 3))
-scene.add(getTree("apple", 4))
-scene.add(getTree("tall", 5))
-scene.add(getTree("pumpkin", 6))
-scene.add(getTree("roses", 7))
-scene.add(getTree("cotton", 9))
-scene.add(getTree("mushroom", 8))
+initialize_terrain()
+scene.add(terraingroup);
 
+getTree("birch", 1)
+getTree("maple", 2)
+getTree("oak", 3)
+getTree("apple", 4)
+getTree("tall", 5)
+getTree("pumpkin", 6)
+getTree("roses", 7)
+getTree("cotton", 9)
+getTree("mushroom", 8)
 
 function getLand(){
     let result = new THREE.Group()
@@ -180,26 +196,43 @@ function getLand(){
     return result
 }
 
-function getTerrain() {
-    const terraingroup = new THREE.Group();
-    for (let i = 0; i < PLOT_WIDTH; i++) {
-        for(let y = 0; y < PLOT_WIDTH; y++){
-            let temp = getLand()
-            temp.position.set(i-1, 0, y-1);
-            terraingroup.add(temp);
-        }
+let toAnimate
+let drop = false
+
+function dropAnimation() {
+    toAnimate.translateY(-0.01)
+    if (toAnimate.position.getComponent(1) <= 0.12){
+        drop = false
+        toAnimate.translateY(0.12-toAnimate.position.getComponent(1))
     }
-    return terraingroup;
 }
 
-const terrain = getTerrain();
-scene.add(terrain);
 var click = 0
 function focus(plot) {
     console.log("focusing")
     var dict = plant_pos_dictionary[plot]
-    controls.target = new THREE.Vector3(dict[0], 0, dict[2])
-    controls.update();
+    controls.target = new THREE.Vector3(dict[0], 0.4, dict[2])
+    for(let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        if (i != plot-1) {
+            terrainarray[i].visible = false;
+        } else {
+            terrainarray[i].visible = true;
+        }
+    }
+    controls.minZoom = 200;
+    terrainarray[plot-1].position.set(terrainarray[plot-1].position.getComponent(0), 0.3, terrainarray[plot-1].position.getComponent(2))
+    toAnimate = terrainarray[plot-1]
+    drop = true
+}
+
+function reconstruct() {
+    for(let i = 0; i < PLOT_WIDTH*PLOT_WIDTH; i++) {
+        terrainarray[i].visible = true;
+        terrainarray[i].position.set(terrainarray[i].position.getComponent(0), 0.12, terrainarray[i].position.getComponent(2))
+    }
+    controls.target = new THREE.Vector3(0, 0, 0)
+    controls.minZoom = 100;
+    camera.zoom = 1;
 }
 
 function buttonclick() {
@@ -211,22 +244,46 @@ function buttonclick() {
     focus(click)
 }
 
+function buttonclick2() {
+    reconstruct()
+}
+
 document.getElementById('button').addEventListener("click", function(e){
     buttonclick()
 })
 
+document.getElementById('button2').addEventListener("click", function(e){
+    buttonclick2()
+})
+
+//Locks animations to 60 fps
+
+let clock = new THREE.Clock();
+let delta = 0;
+let interval = 1 / 60;
+
 function animate() {
-    // cube.rotation.x += .01, cube.rotation.y += .01;
-    // line.rotation.x += .01, line.rotation.y += .01;
-    // if (shiba != null) shiba.rotation.x += .01, shiba.rotation.y += .01;
-    controls.update();
-    renderer.render(scene, camera);
+    requestAnimationFrame(animate)
+    delta += clock.getDelta();
+
+    if (delta  > interval) {
+        if (drop) {
+            dropAnimation()
+        }
+        controls.update();
+
+        renderer.render(scene, camera);
+
+        delta = delta % interval;
+    }
 }
 
-if (WebGL.isWebGLAvailable()) {
-	// Initiate function or other initializations here
-    renderer.setAnimationLoop(animate);
-} else {
-	const warning = WebGL.getWebGLErrorMessage();
-	document.getElementById( 'container' ).appendChild( warning );
-}
+animate();
+
+// if (WebGL.isWebGLAvailable()) {
+// 	// Initiate function or other initializations here
+//     renderer.setAnimationLoop(animate);
+// } else {
+// 	const warning = WebGL.getWebGLErrorMessage();
+// 	document.getElementById( 'container' ).appendChild( warning );
+// }

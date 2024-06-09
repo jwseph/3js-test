@@ -4,7 +4,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const scene = new THREE.Scene();
+<<<<<<< HEAD
 scene.background = new THREE.Color(0xffffff); // 0x9bd2e8
+=======
+scene.background = new THREE.Color(0x9bd2e8);
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
 
 const camera = new THREE.OrthographicCamera(-innerWidth/2, innerWidth/2, innerHeight/2, -innerHeight/2, .000001, 1000);
 camera.position.set(10, 10, 10);
@@ -34,7 +38,11 @@ controls.minPolarAngle = controls.maxPolarAngle = Math.asin((2/3)**.5);
 controls.update();
 
 function getLights() {
+<<<<<<< HEAD
     const ambLight = new THREE.AmbientLight(0x005396, 2);
+=======
+    const ambLight = new THREE.AmbientLight(0x005396, 3);
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
     const dirLight = new THREE.DirectionalLight(0xffbf00, 5);
     dirLight.castShadow = true;
     dirLight.position.set(3, 7, 1);
@@ -58,7 +66,10 @@ function getLand() {
     const res = new THREE.Group();
     loader.load('./terrain-world-plain.glb', function (gltf) {
         const land = gltf.scene;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
         let m = .0003333333;
         land.scale.set(m, m, m);
         land.position.set(0, .12, 0);
@@ -69,7 +80,10 @@ function getLand() {
                 child.material.metalness = 0;
             }
         } );
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
         res.add(land);
     }, undefined, function (error) {
         console.error(error);
@@ -104,7 +118,11 @@ const treeDictionary = {  // location, magnification, delta y
     'tall': ['./tree-tall.glb', 1/500, 0.13],
 };
 
+<<<<<<< HEAD
 function getTree(treeType, scale = 1, dead = false) {
+=======
+function getTree(treeType, scale = 1) {
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
     const res = new THREE.Group();
     let [location, m, y] = treeDictionary[treeType];
     m *= scale;
@@ -115,10 +133,15 @@ function getTree(treeType, scale = 1, dead = false) {
             if (child.isMesh) {
                 child.castShadow = child.receiveShadow = true;
                 child.material.metalness = 0;
+<<<<<<< HEAD
                 if (dead) {
                     let color = child.material.color;
                     color.r = color.g = color.b = .3;
                 }
+=======
+                let color = child.material.color;  // these two lines make the plant all black
+                color.r = color.g = color.b = 0;  // 
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
             }
         });
         tree.position.set(0, y, 0);
@@ -130,12 +153,20 @@ function getTree(treeType, scale = 1, dead = false) {
 }
 
 const chunks = [];
+<<<<<<< HEAD
 function getChunk(x, z, treeType, scale, dead) {
+=======
+function getChunk(x, z) {
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
     const land = getLand();
     land.position.set(x, 0, z);
     land.receiveShadow = true;
 
+<<<<<<< HEAD
     const tree = getTree(treeType, scale, dead);
+=======
+    const tree = getTree('birch');
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
     tree.position.set(x, 0, z);
 
     const chunk = new THREE.Group();
@@ -146,6 +177,7 @@ function getChunk(x, z, treeType, scale, dead) {
 
 const loader = new GLTFLoader();
 
+<<<<<<< HEAD
 scene.add(getChunk(0, 0, 'birch', .4));
 scene.add(getChunk(1, 0, 'oak', 1, true));
 scene.add(getChunk(2, 0, 'maple', .5));
@@ -162,6 +194,9 @@ scene.add(getChunk(0, 3, 'oak', 0));
 scene.add(getChunk(1, 3, 'spruce', 1, true));
 scene.add(getChunk(2, 3, 'birch-tall', 1));
 scene.add(getChunk(3, 3, 'oak', 0));
+=======
+scene.add(getChunk(0, 0));
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
 
 function animate() {
     controls.update();
@@ -192,4 +227,8 @@ renderer.domElement.addEventListener('mousedown', function (e) {
             console.log(chunk);
         }
     }
+<<<<<<< HEAD
 });
+=======
+});
+>>>>>>> 4f48eb74d66db8efc77f8d29b5d8af85371756ca
