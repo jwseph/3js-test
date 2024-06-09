@@ -47,16 +47,15 @@ const PLOT_WIDTH = 3
 
 const scene = new THREE.Scene();
 const camera = new THREE.OrthographicCamera(-innerWidth/4, innerWidth/4, innerHeight/4, -innerHeight/4, .000001, 1000 );
-camera.position.set(100, 100, 100);
+camera.position.set(10, 10, 10);
 camera.zoom = 100;
 const hemiLight = new THREE.HemisphereLight( 0x0000ff, 0x00ff00, 0.6 ); 
 scene.add(hemiLight)
+scene.add(camera)
 
-// scene.background = new THREE.Color(0x0CA6EA)
+scene.background = new THREE.Color(0x9bd2e8);
+
 window.camera = camera;
-
-const camerahelper = new THREE.CameraHelper(camera)
-scene.add(camerahelper)
 
 const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -68,20 +67,19 @@ document.body.appendChild(renderer.domElement);
 
 var controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.screenSpacePanning = true;
+controls.screenSpacePanning = false;
 controls.enablePan = false;
 window.controls = controls;
 controls.maxZoom = 400;
-controls.minZoom = 20;
-// controls.maxDistance = 10;
+controls.minZoom = 40;
 controls.minPolarAngle = controls.maxPolarAngle = Math.asin((2/3)**.5);
 controls.target = new THREE.Vector3(0, 0, 0)
 controls.update();
 
 window.addEventListener('resize', function () {
     renderer.setSize(innerWidth, innerHeight);
-    [camera.left, camera.right] = [-innerWidth/2, innerWidth/2];
-    [camera.top, camera.bottom] = [innerHeight/2, -innerHeight/2];
+    [camera.left, camera.right] = [-innerWidth/4, innerWidth/4];
+    [camera.top, camera.bottom] = [innerHeight/4, -innerHeight/4];
     camera.updateProjectionMatrix();
 })
 
@@ -228,8 +226,6 @@ function focus(plot) {
     drop = true
 }
 
-
-
 function buttonclick() {
     if (click >= 9) {
         click = 1
@@ -243,6 +239,7 @@ document.getElementById('button').addEventListener("click", function(e){
     buttonclick()
 })
 
+//Locks animations to 60 fps
 
 let clock = new THREE.Clock();
 let delta = 0;
