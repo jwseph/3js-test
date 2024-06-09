@@ -7,9 +7,29 @@ const plants_dictionary = {
     "birch":["./tree-birch.glb", 1/800, 0.12],
     "maple":["./tree-maple.glb", 1/800, 0.12],
     "oak":["./tree-oak.glb", 1/800, 0.12],
-    "apple":["./tree-round-apple.glb", 1/800, 0.12],
-    "tall":["./tree-tall.glb", 1/500, 0.12]
+    "apple":["./tree-round-apple.glb", 1/500, 0.12],
+    "carnations":["./carnations.glb", 1/500, 0.12],
+    "tall":["./tree-tall.glb", 1/500, 0.12],
+    "birch-tall":["./tree-birch-tall.glb", 1/500, 0.12],
+    "forest":["./tree-forest.glb", 1/500, 0.12],
+    "lime":["./tree-lime.glb", 1/500, 0.12],
+    "little":["./tree-little.glb", 1/500, 0.12],
+    "simple":["./tree-simple.glb", 1/500, 0.12],
+    "spruce":["./tree-spruce.glb", 1/500, 0.12],
+    "cotton":["./cotton.glb", 1/500, 0.12],
+    "poisonous":["./flower-poisonous.glb", 1/500, 0.12],
+    "clumb":["./grass-clumb.glb", 1/500, 0.12],
+    "sea":["./grass-sea.glb", 1/500, 0.12],
+    "mushroom":["./mushroom-toadstool.glb", 1/500, 0.12],
+    "pumpkin-leaves":["./pumkin-leaves.glb", 1/500, 0.12],
+    "pumpkin":["./pumkin.glb", 1/500, 0.12],
+    "roses":["./roses.glb", 1/500, 0.12],
+    "shrub-flowers":["./shrub-flowers.glb", 1/500, 0.12],
+    "sunflower":["./sunflower.glb", 1/500, 0.12],
+    "wheat":["./wheat-plant.glb", 1/500, 0.12],
+    "tall":["./tree-tall.glb", 1/500, 0.13],
 };
+
 
 const plant_pos_dictionary = {
     "1":[-1,0,-1],
@@ -71,39 +91,37 @@ const dirLight = new THREE.DirectionalLight(0xF9E30E, 5); // soft white light
 dirLight.castShadow = true;
 dirLight.position.set(3, 7, 1);
 let light = dirLight;
-light.shadow.mapSize.width = 512; // default
-light.shadow.mapSize.height = 512; // default
-light.shadow.camera.near = 0.01; // default
-light.shadow.camera.far = 500; // default
-light.shadow.camera.left = -20;
-light.shadow.camera.right = 20;
-light.shadow.camera.bottom = -20;
-light.shadow.camera.top = 20;
-
-
+light.shadow.mapSize.width = 1024; // default
+light.shadow.mapSize.height = 1024; // default
+light.shadow.camera.near = 0.001; // default
+light.shadow.camera.far = 1000; // default
+light.shadow.camera.left = -10;
+light.shadow.camera.right = 10;
+light.shadow.camera.bottom = -10;
+light.shadow.camera.top = 10;
 
 const shadowhelper = new THREE.DirectionalLightHelper(dirLight);
 scene.add(shadowhelper);
 
 scene.add(dirLight);
 
-const ambLight = new THREE.AmbientLight(0x2CDBFC, 5);
+const ambLight = new THREE.AmbientLight(0x2CDBFC, 0.4);
 scene.add(ambLight);
 
 const loader = new GLTFLoader();
 
-var skyGeo = new THREE.SphereGeometry(400, 25, 25); 
+// var skyGeo = new THREE.SphereGeometry(400, 25, 25); 
 
-var texloader  = new THREE.TextureLoader();
-var texture = texloader.load( "./sky.jpg" );
+// var texloader  = new THREE.TextureLoader();
+// var texture = texloader.load( "./sky.jpg" );
 
-var material = new THREE.MeshPhongMaterial({ 
-    map: texture,
-});
+// var material = new THREE.MeshPhongMaterial({ 
+//     map: texture,
+// });
 
-var sky = new THREE.Mesh(skyGeo, material);
-sky.material.side = THREE.BackSide;
-scene.add(sky);
+// var sky = new THREE.Mesh(skyGeo, material);
+// sky.material.side = THREE.BackSide;
+// scene.add(sky);
 
 function getTree(key, pos){
     let plant = plants_dictionary[key]
@@ -119,6 +137,7 @@ function getTree(key, pos){
         tree.receiveShadow = true;
         tree.traverse( function( child ) { 
             if ( child.isMesh ) {
+                child.material.metalness = 0;
                 child.castShadow = true;
                 child.receiveShadow = true;
             }
@@ -135,9 +154,10 @@ scene.add(getTree("maple", 2))
 scene.add(getTree("oak", 3))
 scene.add(getTree("apple", 4))
 scene.add(getTree("tall", 5))
-scene.add(getTree("oak", 6))
-scene.add(getTree("apple", 7))
-scene.add(getTree("birch", 9))
+scene.add(getTree("pumpkin", 6))
+scene.add(getTree("roses", 7))
+scene.add(getTree("cotton", 9))
+scene.add(getTree("mushroom", 8))
 
 
 function getLand(){
@@ -149,14 +169,11 @@ function getLand(){
         land.position.set(0,0.12,0)
         land.receiveShadow = true;
         land.traverse( function( child ) { 
-
             if ( child.isMesh ) {
-        
+                child.material.metalness = 0;
                 child.castShadow = true;
                 child.receiveShadow = true;
-        
             }
-        
         } );
         result.add(land)
     }, undefined, function (error) {
@@ -166,14 +183,11 @@ function getLand(){
 }
 
 function getTerrain() {
-    const geometry = new THREE.BoxGeometry(1, .25, 1);
-    const material = new THREE.MeshPhongMaterial({color: 0x7bb61f});
     const terraingroup = new THREE.Group();
     for (let i = 0; i < PLOT_WIDTH; i++) {
         for(let y = 0; y < PLOT_WIDTH; y++){
             let temp = getLand()
             temp.position.set(i-1, 0, y-1);
-            temp.receiveShadow = true;
             terraingroup.add(temp);
         }
     }
@@ -181,8 +195,6 @@ function getTerrain() {
 }
 
 const terrain = getTerrain();
-terrain.receiveShadow = true;
-console.log(terrain);
 scene.add(terrain);
 
 
