@@ -113,8 +113,8 @@ function getTree(treeType, scale = 1) {
             if (child.isMesh) {
                 child.castShadow = child.receiveShadow = true;
                 child.material.metalness = 0;
-                let color = child.material.color;
-                color.r = color.g = color.b = 0;
+                let color = child.material.color;  // these two lines make the plant all black
+                color.r = color.g = color.b = 0;  // 
             }
         });
         tree.position.set(0, y, 0);
